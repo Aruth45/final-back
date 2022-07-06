@@ -13,13 +13,16 @@ userRouter.route("/").get(async (req, res) => {
 });
 
 userRouter
-  .route("/:id")
+  .route("/getuser")
   .get(async (req, res) => {
-    const userID = req.params.id;
+    const token = req.headers["x-access-token"];
 
     try {
-      const user = await UserService.getUser(userID);
-      res.json(user);
+      const decoded = jwt.verify(token, process.env.SECRET_KEY);
+      const id = decoded.id;
+      const user = await UserService.getUser(id);
+      const accounts = await AcccountService.getAllAccounts(id);
+      res.json({ user, accounts });
     } catch (err) {
       res.json({ error: "Object could not be found", details: err });
     }
@@ -70,7 +73,7 @@ userRouter.route("/").post(async (req, res) => {
 userRouter.route("/login").post(async (req, res) => {
   const userFound = await UserService.getUserByEmail(req.body.email);
 
-  if (!userFound) return res.status(400).json({ error: "User not found" });
+  if (!userFound) return res.json({ error: "User not found" });
 
   const matchPassword = await bcrypt.compare(
     req.body.password,
@@ -81,7 +84,7 @@ userRouter.route("/login").post(async (req, res) => {
     return res.status(401).json({ token: null, error: "Invalid password" });
 
   const token = jwt.sign({ id: userFound._id }, process.env.SECRET_KEY);
-  res.json({ token });
+  res.send({ token: token, userID: userFound._id });
 });
 
 module.exports = userRouter;

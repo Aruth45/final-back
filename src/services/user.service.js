@@ -7,7 +7,7 @@ class UserService {
   }
 
   static async getUser(id) {
-    const user = await User.findById(id);
+    const user = await User.findById(id).select("-password");
     return user;
   }
 

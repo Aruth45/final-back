@@ -1,34 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
-const logger = require("./src/middleware/logger.middleware");
 const cors = require("cors");
 const userRouter = require("./src/routes/users.routes");
-const passport = require("passport");
-const passportLocal = require("passport-local").Strategy;
-const cookieParser = require("cookie-parser");
-const session = require("express-session");
-const DB_HOST = process.env.DB_HOST || "mongodb://localhost:27017";
-const DB_NAME = process.env.DB_NAME || "bank-fp";
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-  })
-);
-
-app.use(
-  session({
-    secret: "konradisthesecretword",
-    resave: true,
-    saveUninitialized: true,
-  })
-);
-
-app.use(cookieParser("konradisthesecretword"));
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(logger);
+const DB_HOST = process.env.DB_HOST || "mongodb://localhost:27017";
+const DB_NAME = process.env.DB_NAME || "bank-fp";
 
 mongoose
   .connect(`${DB_HOST}/${DB_NAME}`)
