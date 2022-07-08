@@ -3,6 +3,7 @@ const transactionsRouter = express.Router();
 const AcccountService = require("../services/account.service");
 const Service = require("../services/service");
 const History = require("../services/history.service");
+const jwt = require("jsonwebtoken");
 
 transactionsRouter.route("/payment").put(async (req, res) => {
   try {
@@ -89,6 +90,36 @@ transactionsRouter.route("/transfermoney").put(async (req, res) => {
     });
   } catch (err) {
     res.json({ error: "Transaction could not be completed", details: err });
+  }
+});
+
+transactionsRouter.route("/addmoney").put(async (req, res) => {
+  const originAccount = await AcccountService.getAccount(req.body.origin);
+  const destinationAccount = await AcccountService.getAccount(
+    req.body.destination
+  );
+
+  if (originAccount.account === destinationAccount.account) {
+    return res.json({
+      error: "You cannot add money to the same account",
+    });
+  }
+
+  try {
+    const token = req.headers["x-access-token"];
+
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+
+    if (originAccount.userID === decoded.id) {
+      const updatedAccount = await AcccountService.updateAccount(
+        destinationAccount._id,
+        { balance: destinationAccount.balance + req.body.amount }
+      );
+    }
+
+    res.json({ success: "Transaction successfull" });
+  } catch (err) {
+    res.json({ error: "Transaction could not be completed" });
   }
 });
 
