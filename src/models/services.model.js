@@ -1,7 +1,9 @@
 const mongoose = require("mongoose");
 
 const serviceSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  userID: { type: String, required: true },
+  category: { type: String, required: true },
+  company: { type: String, required: true },
   amount: { type: Number, required: true },
   isPaid: { type: Boolean, required: true },
 });

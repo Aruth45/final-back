@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const app = express();
 const cors = require("cors");
 const userRouter = require("./src/routes/users.routes");
+const transactionsRouter = require("./src/routes/trasactions.routes");
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -19,5 +20,6 @@ mongoose
   });
 
 app.use("/users", userRouter);
+app.use("/transactions", transactionsRouter);
 
 module.exports = app;

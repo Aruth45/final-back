@@ -1,6 +1,7 @@
 const express = require("express");
 const UserService = require("../services/user.service");
 const AcccountService = require("../services/account.service");
+const Services = require("../services/service");
 const userRouter = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -22,7 +23,9 @@ userRouter
       const id = decoded.id;
       const user = await UserService.getUser(id);
       const accounts = await AcccountService.getAllAccounts(id);
-      res.json({ user, accounts });
+      const services = await Services.getAllServices(id);
+
+      res.json({ user, accounts, services });
     } catch (err) {
       res.json({ error: "Object could not be found", details: err });
     }
@@ -59,6 +62,7 @@ userRouter.route("/").post(async (req, res) => {
     const userData = { ...req.body, password: hashedPassword };
     const createdUser = await UserService.addUser(userData);
     const createdAccount = await AcccountService.addAccount(createdUser._id);
+    await Services.addService(createdUser._id);
 
     res.send({
       success: "Account created sucessfully",
@@ -85,6 +89,10 @@ userRouter.route("/login").post(async (req, res) => {
 
   const token = jwt.sign({ id: userFound._id }, process.env.SECRET_KEY);
   res.send({ token: token, userID: userFound._id });
+});
+
+userRouter.route("/upload/:id").put(async (req, res) => {
+  console.log(req.body);
 });
 
 module.exports = userRouter;
